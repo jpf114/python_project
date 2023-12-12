@@ -3,9 +3,11 @@ import torchvision.datasets
 from torch import nn
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+import time
 
 from pytorch_38.model_class import model_class1
 
+# 数据集准备
 train_data = torchvision.datasets.CIFAR10("data", train=True, transform=torchvision.transforms.ToTensor(),
                                           download=True)
 test_data = torchvision.datasets.CIFAR10("data", train=False, transform=torchvision.transforms.ToTensor(),
@@ -28,7 +30,6 @@ loss_fn = nn.CrossEntropyLoss()
 learn_rate = 0.01
 optim = torch.optim.SGD(model_c1.parameters(), lr=learn_rate)
 
-
 # 设置网络模型的一些参数
 # 记录训练的次数
 total_train_step = 0
@@ -37,11 +38,12 @@ total_test_step = 0
 # 训练的轮数
 epoch = 30
 
-
 writer = SummaryWriter("log")
 
+start_time = time.time()
 for i in range(epoch):
     print("------------第{}轮训练-------------".format(i+1))
+
 
     # 训练步骤开始
     model_c1.train()
@@ -57,7 +59,9 @@ for i in range(epoch):
 
         total_train_step = total_train_step + 1
         if total_train_step % 100 == 0:
+            end_time = time.time()
             print("训练次数：{}，loss：{}".format(total_train_step, loss.item()))
+            print("时间：{}".format(end_time - start_time))
             writer.add_scalar('train_loss', loss.item(), total_train_step)
 
     # 测试步骤开始
@@ -80,7 +84,7 @@ for i in range(epoch):
     total_test_step = total_test_step + 1
 
 
-    torch.save(model_c1, "model/model_c1_{}.pth".format(i))
+    torch.save(model_c1, "model/model_c1_cpu_{}.pth".format(i+1))
     print("模型已保存")
 
 writer.close()
