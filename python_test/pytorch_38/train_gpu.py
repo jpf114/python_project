@@ -1,12 +1,11 @@
-import time
-
 import torch.utils.data
 import torchvision.datasets
 from torch import nn
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+import time
 
-# from pytorch_38.model_class import model_class1
+from pytorch_38.model_class import model_class1
 
 # 数据集准备
 train_data = torchvision.datasets.CIFAR10("data", train=True, transform=torchvision.transforms.ToTensor(),
@@ -24,26 +23,6 @@ test_dataloader = DataLoader(test_data, batch_size=64)
 Device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 创建网络模型
-class model_class1(nn.Module):
-    def __init__(self):
-        super(model_class1, self).__init__()
-        self.model = nn.Sequential(
-            nn.Conv2d(3, 32, 5, 1, 2),
-            nn.MaxPool2d(2),
-            nn.Conv2d(32, 32, 5, 1, 2),
-            nn.MaxPool2d(2),
-            nn.Conv2d(32, 64, 5, 1, 2),
-            nn.MaxPool2d(2),
-            nn.Flatten(),
-            nn.Linear(64 * 4 * 4, 64),
-            nn.Linear(64, 10)
-        )
-
-    def forward(self, x):
-        x = self.model(x)
-        return x
-
-
 model_c1 = model_class1()
 model_c1.to(Device)
 
@@ -65,9 +44,10 @@ epoch = 30
 
 writer = SummaryWriter("log")
 
+start_time = time.time()
 for i in range(epoch):
     print("------------第{}轮训练-------------".format(i + 1))
-    start_time = time.time()
+
     # 训练步骤开始
     model_c1.train()
     for tra_data in train_dataloader:
@@ -110,7 +90,7 @@ for i in range(epoch):
     writer.add_scalar('test_accuracy', total_accuracy / test_data_size, total_test_step)
     total_test_step = total_test_step + 1
 
-    torch.save(model_c1, "model/model_c1_{}.pth".format(i))
+    torch.save(model_c1, "model/model_c1_gpu_{}.pth".format(i+1))
     print("模型已保存")
 
 writer.close()
